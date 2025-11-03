@@ -44,15 +44,15 @@ export async function POST(request: NextRequest) {
     const city = cityData as any
 
     // Create research job
-    const { data: job, error: jobError } = await supabaseAdmin()
+    const { data: job, error: jobError } = await (supabaseAdmin() as any)
       .from('research_jobs')
       .insert({
         city_id: cityId,
         page_type: pageType,
         topic,
         neighborhood,
-        status: 'processing' as const,
-      } as any)
+        status: 'processing',
+      })
       .select()
       .single()
 
@@ -118,10 +118,10 @@ export async function POST(request: NextRequest) {
       `
 
       // Update research job with results
-      await supabaseAdmin()
+      await (supabaseAdmin() as any)
         .from('research_jobs')
         .update({
-          status: 'completed' as const,
+          status: 'completed',
           results_json: {
             title: content.title,
             metaDescription: content.metaDescription,
@@ -132,7 +132,7 @@ export async function POST(request: NextRequest) {
           word_count: content.wordCount,
           questions_count: content.questionsCount,
           completed_at: new Date().toISOString(),
-        } as any)
+        })
         .eq('id', (job as any).id)
 
       return NextResponse.json({
@@ -147,12 +147,12 @@ export async function POST(request: NextRequest) {
       })
     } catch (error: any) {
       // Update job with error
-      await supabaseAdmin()
+      await (supabaseAdmin() as any)
         .from('research_jobs')
         .update({
-          status: 'failed' as const,
+          status: 'failed',
           error_message: error.message,
-        } as any)
+        })
         .eq('id', (job as any).id)
 
       throw error

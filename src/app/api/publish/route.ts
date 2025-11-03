@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
 
     // Save WordPress page record
     const jobData = job as any
-    const { data: pageRecord, error: pageError } = await supabaseAdmin()
+    const { data: pageRecord, error: pageError } = await (supabaseAdmin() as any)
       .from('wordpress_pages')
       .insert({
         city_id: jobData.city_id,
@@ -91,9 +91,9 @@ export async function POST(request: NextRequest) {
         title: results.title,
         slug: wpPage.slug,
         parent_post_id: parentId || null,
-        status: 'publish' as const,
+        status: 'publish',
         published_at: new Date().toISOString(),
-      } as any)
+      })
       .select()
       .single()
 

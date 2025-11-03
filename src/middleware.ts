@@ -15,7 +15,7 @@ export function middleware(request: NextRequest) {
 
   // Get token from cookie
   const token = request.cookies.get('sb-access-token')?.value ||
-                request.cookies.get('sb-zfrgvionocpdsmyfwwlb-auth-token')?.value
+                request.cookies.get('sb-hrakofsjpivxbepjmthd-auth-token')?.value
 
   // Redirect to login if accessing protected route without token
   if (!isPublicPath && !token && path !== '/') {

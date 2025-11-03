@@ -30,7 +30,7 @@ async function getCityStats(cityId: string) {
 
   return {
     totalJobs: researchJobs.data?.length || 0,
-    completedJobs: researchJobs.data?.filter(j => j.status === 'completed').length || 0,
+    completedJobs: researchJobs.data?.filter((j: any) => j.status === 'completed').length || 0,
     publishedPages: publishedPages.data?.length || 0,
   }
 }

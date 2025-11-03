@@ -18,14 +18,14 @@ export default function LoginPage() {
     setError('')
 
     try {
-      console.log('Attempting login with:', email)
-      const result = await authService.signIn(email, password)
-      console.log('Login successful:', result)
+      await authService.signIn(email, password)
 
-      // Use window.location for a hard redirect to ensure cookies are set
+      // Wait a moment for session to persist
+      await new Promise(resolve => setTimeout(resolve, 500))
+
+      // Use window.location for a hard redirect to ensure session is loaded
       window.location.href = '/dashboard'
     } catch (err: any) {
-      console.error('Login error:', err)
       setError(err.message || 'Failed to sign in')
       setLoading(false)
     }

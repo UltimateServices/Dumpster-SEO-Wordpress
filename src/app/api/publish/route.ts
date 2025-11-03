@@ -77,22 +77,23 @@ export async function POST(request: NextRequest) {
     })
 
     // Save WordPress page record
+    const jobData = job as any
     const { data: pageRecord, error: pageError } = await supabaseAdmin()
       .from('wordpress_pages')
       .insert({
-        city_id: (job as any).city_id,
-        research_job_id: (job as any).id,
+        city_id: jobData.city_id,
+        research_job_id: jobData.id,
         wp_post_id: wpPage.id,
         url: wpPage.link,
-        page_type: (job as any).page_type,
-        topic: (job as any).topic,
-        neighborhood: (job as any).neighborhood,
+        page_type: jobData.page_type,
+        topic: jobData.topic,
+        neighborhood: jobData.neighborhood,
         title: results.title,
         slug: wpPage.slug,
         parent_post_id: parentId || null,
-        status: 'publish',
+        status: 'publish' as const,
         published_at: new Date().toISOString(),
-      })
+      } as any)
       .select()
       .single()
 

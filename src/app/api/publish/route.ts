@@ -33,32 +33,32 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    if (job.status !== 'completed') {
+    if ((job as any).status !== 'completed') {
       return NextResponse.json(
         { error: 'Research job is not completed' },
         { status: 400 }
       )
     }
 
-    if (!job.results_json) {
+    if (!(job as any).results_json) {
       return NextResponse.json(
         { error: 'Research job has no content' },
         { status: 400 }
       )
     }
 
-    const results = job.results_json as any
-    const city = job.geo_locations as any
+    const results = (job as any).results_json
+    const city = (job as any).geo_locations
 
     // Generate slug
     const slugParts = [city.city, city.state_abbr]
-    if (job.topic) slugParts.push(job.topic)
-    if (job.neighborhood) slugParts.push(job.neighborhood)
+    if ((job as any).topic) slugParts.push((job as any).topic)
+    if ((job as any).neighborhood) slugParts.push((job as any).neighborhood)
     const slug = generateSlug(...slugParts)
 
     // Check if parent page exists (for topic and neighborhood pages)
     let parentId: number | undefined
-    if (job.page_type !== 'main_city') {
+    if ((job as any).page_type !== 'main_city') {
       const parentSlug = generateSlug(city.city, city.state_abbr)
       const parentPage = await wordpressService.getPageBySlug(parentSlug)
       parentId = parentPage?.id
@@ -80,13 +80,13 @@ export async function POST(request: NextRequest) {
     const { data: pageRecord, error: pageError } = await supabaseAdmin()
       .from('wordpress_pages')
       .insert({
-        city_id: job.city_id,
-        research_job_id: job.id,
+        city_id: (job as any).city_id,
+        research_job_id: (job as any).id,
         wp_post_id: wpPage.id,
         url: wpPage.link,
-        page_type: job.page_type,
-        topic: job.topic,
-        neighborhood: job.neighborhood,
+        page_type: (job as any).page_type,
+        topic: (job as any).topic,
+        neighborhood: (job as any).neighborhood,
         title: results.title,
         slug: wpPage.slug,
         parent_post_id: parentId || null,

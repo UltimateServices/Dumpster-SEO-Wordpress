@@ -18,10 +18,13 @@ export default function LoginPage() {
     setError('')
 
     try {
-      await authService.signIn(email, password)
+      console.log('Attempting login with:', email)
+      const result = await authService.signIn(email, password)
+      console.log('Login successful:', result)
       router.push('/dashboard')
       router.refresh()
     } catch (err: any) {
+      console.error('Login error:', err)
       setError(err.message || 'Failed to sign in')
     } finally {
       setLoading(false)

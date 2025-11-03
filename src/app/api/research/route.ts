@@ -28,18 +28,20 @@ export async function POST(request: NextRequest) {
     }
 
     // Get city information
-    const { data: city, error: cityError } = await supabaseAdmin()
+    const { data: cityData, error: cityError } = await supabaseAdmin()
       .from('geo_locations')
       .select('*')
       .eq('id', cityId)
       .single()
 
-    if (cityError || !city) {
+    if (cityError || !cityData) {
       return NextResponse.json(
         { error: 'City not found' },
         { status: 404 }
       )
     }
+
+    const city = cityData as any
 
     // Create research job
     const { data: job, error: jobError } = await supabaseAdmin()

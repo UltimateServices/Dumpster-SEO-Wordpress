@@ -40,7 +40,7 @@ export default async function CitiesPage() {
 
   // In production, you'd want to batch these queries or use a JOIN
   const citiesWithStats = await Promise.all(
-    cities.map(async (city) => {
+    cities.map(async (city: any) => {
       const stats = await getCityStats(city.id)
       return { ...city, ...stats }
     })

@@ -21,12 +21,12 @@ export default function LoginPage() {
       console.log('Attempting login with:', email)
       const result = await authService.signIn(email, password)
       console.log('Login successful:', result)
-      router.push('/dashboard')
-      router.refresh()
+
+      // Use window.location for a hard redirect to ensure cookies are set
+      window.location.href = '/dashboard'
     } catch (err: any) {
       console.error('Login error:', err)
       setError(err.message || 'Failed to sign in')
-    } finally {
       setLoading(false)
     }
   }

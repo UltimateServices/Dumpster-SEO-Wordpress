@@ -1,50 +1,51 @@
+'use client'
+
+import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase/client'
 import Table from '@/components/ui/Table'
 import Link from 'next/link'
 
-async function getCities() {
-  const { data, error } = await supabase
-    .from('geo_locations')
-    .select('*')
-    .order('priority_rank', { ascending: true })
+export default function CitiesPage() {
+  const [cities, setCities] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
 
-  if (error) {
-    console.error('Error fetching cities:', error)
-    return []
-  }
+  useEffect(() => {
+    async function fetchData() {
+      const { data, error } = await supabase
+        .from('geo_locations')
+        .select('*')
+        .order('priority_rank', { ascending: true })
 
-  return data || []
-}
+      if (!error && data) {
+        // Fetch stats for each city
+        const citiesWithStats = await Promise.all(
+          data.map(async (city: any) => {
+            const [researchJobs, publishedPages] = await Promise.all([
+              supabase
+                .from('research_jobs')
+                .select('id, status')
+                .eq('city_id', city.id),
+              supabase
+                .from('wordpress_pages')
+                .select('id')
+                .eq('city_id', city.id),
+            ])
 
-async function getCityStats(cityId: string) {
-  const [researchJobs, publishedPages] = await Promise.all([
-    supabase
-      .from('research_jobs')
-      .select('id, status')
-      .eq('city_id', cityId),
-    supabase
-      .from('wordpress_pages')
-      .select('id')
-      .eq('city_id', cityId),
-  ])
+            return {
+              ...city,
+              totalJobs: researchJobs.data?.length || 0,
+              completedJobs: researchJobs.data?.filter((j: any) => j.status === 'completed').length || 0,
+              publishedPages: publishedPages.data?.length || 0,
+            }
+          })
+        )
+        setCities(citiesWithStats)
+      }
+      setLoading(false)
+    }
 
-  return {
-    totalJobs: researchJobs.data?.length || 0,
-    completedJobs: researchJobs.data?.filter((j: any) => j.status === 'completed').length || 0,
-    publishedPages: publishedPages.data?.length || 0,
-  }
-}
-
-export default async function CitiesPage() {
-  const cities = await getCities()
-
-  // In production, you'd want to batch these queries or use a JOIN
-  const citiesWithStats = await Promise.all(
-    cities.map(async (city: any) => {
-      const stats = await getCityStats(city.id)
-      return { ...city, ...stats }
-    })
-  )
+    fetchData()
+  }, [])
 
   const columns = [
     {
@@ -123,6 +124,14 @@ export default async function CitiesPage() {
     },
   ]
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center p-12">
+        <div className="text-gray-500">Loading cities...</div>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -141,7 +150,7 @@ export default async function CitiesPage() {
 
       <div className="rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
         <Table
-          data={citiesWithStats}
+          data={cities}
           columns={columns}
           emptyMessage="No cities found. Add your first city to get started."
         />
@@ -159,7 +168,7 @@ export default async function CitiesPage() {
         </div>
         <div className="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
           <div className="text-2xl font-bold text-gray-900 dark:text-white">
-            {citiesWithStats.reduce((sum, city) => sum + city.publishedPages, 0)}
+            {cities.reduce((sum, city) => sum + (city.publishedPages || 0), 0)}
           </div>
           <div className="text-sm text-gray-500 dark:text-gray-400">
             Total Published Pages
@@ -167,7 +176,7 @@ export default async function CitiesPage() {
         </div>
         <div className="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
           <div className="text-2xl font-bold text-gray-900 dark:text-white">
-            {citiesWithStats.reduce((sum, city) => sum + (city.population || 0), 0).toLocaleString()}
+            {cities.reduce((sum, city) => sum + (city.population || 0), 0).toLocaleString()}
           </div>
           <div className="text-sm text-gray-500 dark:text-gray-400">
             Total Population Covered

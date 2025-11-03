@@ -49,8 +49,8 @@ export async function POST(request: NextRequest) {
         page_type: pageType,
         topic,
         neighborhood,
-        status: 'processing',
-      })
+        status: 'processing' as const,
+      } as any)
       .select()
       .single()
 
@@ -119,7 +119,7 @@ export async function POST(request: NextRequest) {
       await supabaseAdmin()
         .from('research_jobs')
         .update({
-          status: 'completed',
+          status: 'completed' as const,
           results_json: {
             title: content.title,
             metaDescription: content.metaDescription,
@@ -130,8 +130,8 @@ export async function POST(request: NextRequest) {
           word_count: content.wordCount,
           questions_count: content.questionsCount,
           completed_at: new Date().toISOString(),
-        })
-        .eq('id', job.id)
+        } as any)
+        .eq('id', (job as any).id)
 
       return NextResponse.json({
         success: true,
@@ -148,10 +148,10 @@ export async function POST(request: NextRequest) {
       await supabaseAdmin()
         .from('research_jobs')
         .update({
-          status: 'failed',
+          status: 'failed' as const,
           error_message: error.message,
-        })
-        .eq('id', job.id)
+        } as any)
+        .eq('id', (job as any).id)
 
       throw error
     }
